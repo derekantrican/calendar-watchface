@@ -37,6 +37,7 @@ class MainActivity : ComponentActivity() {
 
     private var settings by mutableStateOf(WatchFaceSettings())
     private var calendars by mutableStateOf<List<CalendarInfo>>(emptyList())
+    private var disabledCalendarIds: Set<Long> = emptySet()
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -51,10 +52,15 @@ class MainActivity : ComponentActivity() {
         settingsRepo = SettingsRepository(applicationContext)
         calendarRepo = CalendarRepository(applicationContext)
 
-        if (calendarRepo.hasPermission()) {
-            loadCalendars()
-        } else {
-            permissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+        scope.launch {
+            settings = settingsRepo.loadSettings()
+            disabledCalendarIds = settingsRepo.loadDisabledCalendarIds()
+
+            if (calendarRepo.hasPermission()) {
+                loadCalendars()
+            } else {
+                permissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+            }
         }
 
         setContent {
@@ -107,13 +113,19 @@ class MainActivity : ComponentActivity() {
 
     private fun loadCalendars() {
         val loaded = calendarRepo.getCalendars()
-        calendars = loaded.map { it.copy(isEnabled = true) }
+        calendars = loaded.map { it.copy(isEnabled = it.id !in disabledCalendarIds) }
     }
 
     private fun syncSettings() {
         val enabledIds = calendars.filter { it.isEnabled }.map { it.id }
+        // Keep disabled IDs for calendars not currently listed (e.g. sync temporarily off)
+        disabledCalendarIds = (disabledCalendarIds - calendars.map { it.id }.toSet()) +
+            calendars.filter { !it.isEnabled }.map { it.id }
+        val settingsSnapshot = settings
+        val disabledSnapshot = disabledCalendarIds
         scope.launch {
-            settingsRepo.syncSettingsToWatch(settings, enabledIds)
+            settingsRepo.saveSettings(settingsSnapshot, disabledSnapshot)
+            settingsRepo.syncSettingsToWatch(settingsSnapshot, enabledIds)
         }
     }
 }

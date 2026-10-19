@@ -21,8 +21,8 @@ It's inspired by the watch face that came with the **Outlook** app for Wear OS, 
 - **Companion phone app:**
   - Live preview of the watch face with your settings (using sample events)
   - Toggles for every display option and an event band thickness slider
-  - Calendar picker to choose which calendars appear on the watch
-  - Changes sync to the watch within seconds over the Wearable Data Layer
+  - Calendar picker to choose which calendars appear on the watch (newly added calendars are shown by default)
+  - Changes are saved on the phone and sync to the watch within seconds over the Wearable Data Layer
 
 ## How it works
 
@@ -125,5 +125,4 @@ Open **Calendar Watch Face** on the phone and grant calendar access.
 ## Known issues
 
 - **Events that cross midnight** (for example sleep from 22:30 to 06:30) draw as a full ring instead of being clipped to the dial, and can hide other events on the same ring.
-- **The phone app doesn't save its settings.** Each launch starts from defaults with all calendars selected. The watch keeps the last settings it received until you change something.
 - The watch face picker may show a blank preview thumbnail for this face.
