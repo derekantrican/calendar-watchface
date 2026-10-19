@@ -51,9 +51,6 @@ fun SettingsScreen(
         SettingToggle("24-Hour Time", settings.militaryTime) {
             onSettingsChanged(settings.copy(militaryTime = it))
         }
-        SettingToggle("24-Hour Hands", settings.use24hourHands) {
-            onSettingsChanged(settings.copy(use24hourHands = it))
-        }
         SettingToggle("Hour Leading Zero", settings.hourLeadingZero) {
             onSettingsChanged(settings.copy(hourLeadingZero = it))
         }
@@ -66,8 +63,8 @@ fun SettingsScreen(
         SettingToggle("Tick Marks in Ambient", settings.showTickMarksOnAmbient) {
             onSettingsChanged(settings.copy(showTickMarksOnAmbient = it))
         }
-        SettingToggle("24-Hour Tick Marks", settings.use24hourTickMarks) {
-            onSettingsChanged(settings.copy(use24hourTickMarks = it))
+        SettingToggle("Outer Ring Represents 24 Hours", settings.outerRing24Hours) {
+            onSettingsChanged(settings.copy(outerRing24Hours = it))
         }
         SettingToggle("Now Indicator", settings.showNowIndicatorOnTickmarks) {
             onSettingsChanged(settings.copy(showNowIndicatorOnTickmarks = it))

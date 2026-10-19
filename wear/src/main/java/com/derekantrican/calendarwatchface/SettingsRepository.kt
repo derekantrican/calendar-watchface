@@ -14,11 +14,10 @@ class SettingsRepository(private val context: Context) {
         WatchFaceSettings(
             analogClock = prefs[Keys.ANALOG_CLOCK] ?: false,
             militaryTime = prefs[Keys.MILITARY_TIME] ?: true,
-            use24hourHands = prefs[Keys.USE_24HOUR_HANDS] ?: false,
+            outerRing24Hours = prefs[Keys.OUTER_RING_24_HOURS] ?: false,
             hourLeadingZero = prefs[Keys.HOUR_LEADING_ZERO] ?: true,
             drawColonBetweenHourAndMinute = prefs[Keys.DRAW_COLON] ?: false,
             showTickMarksOnAmbient = prefs[Keys.TICK_MARKS_AMBIENT] ?: false,
-            use24hourTickMarks = prefs[Keys.USE_24HOUR_TICKS] ?: false,
             showNowIndicatorOnTickmarks = prefs[Keys.NOW_INDICATOR] ?: true,
             showDateOnFace = prefs[Keys.SHOW_DATE] ?: true,
             dateFormat = prefs[Keys.DATE_FORMAT] ?: "EEE  dd",
@@ -34,11 +33,10 @@ class SettingsRepository(private val context: Context) {
     private object Keys {
         val ANALOG_CLOCK = booleanPreferencesKey("analog_clock")
         val MILITARY_TIME = booleanPreferencesKey("military_time")
-        val USE_24HOUR_HANDS = booleanPreferencesKey("use_24hour_hands")
+        val OUTER_RING_24_HOURS = booleanPreferencesKey("outer_ring_24_hours")
         val HOUR_LEADING_ZERO = booleanPreferencesKey("hour_leading_zero")
         val DRAW_COLON = booleanPreferencesKey("draw_colon")
         val TICK_MARKS_AMBIENT = booleanPreferencesKey("tick_marks_ambient")
-        val USE_24HOUR_TICKS = booleanPreferencesKey("use_24hour_ticks")
         val NOW_INDICATOR = booleanPreferencesKey("now_indicator")
         val SHOW_DATE = booleanPreferencesKey("show_date")
         val DATE_FORMAT = stringPreferencesKey("date_format")

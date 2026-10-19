@@ -77,7 +77,7 @@ fun PreviewScreen(
             drawTickMarks(settings, centerX, centerY, scale)
 
             if (settings.showNowIndicatorOnTickmarks) {
-                drawNowIndicator(now, centerX, centerY, scale)
+                drawNowIndicator(settings, now, centerX, centerY, scale)
             }
 
             if (settings.showCalendarEvents) {
@@ -106,7 +106,7 @@ private fun DrawScope.drawTickMarks(settings: WatchFaceSettings, cx: Float, cy: 
     val numberOfTicks = 24
 
     for (i in 0 until numberOfTicks) {
-        val innerR = if (i % 2 == 0 || settings.use24hourTickMarks) cx - 15f * scale else cx - 10f * scale
+        val innerR = if (i % 2 == 0 || settings.outerRing24Hours) cx - 15f * scale else cx - 10f * scale
         val angle = i * Math.PI * 2.0 / numberOfTicks
 
         drawLine(
@@ -124,8 +124,8 @@ private fun DrawScope.drawTickMarks(settings: WatchFaceSettings, cx: Float, cy: 
     }
 }
 
-private fun DrawScope.drawNowIndicator(now: LocalDateTime, cx: Float, cy: Float, scale: Float) {
-    val angle = hourAngle(now, use24hours = false)
+private fun DrawScope.drawNowIndicator(settings: WatchFaceSettings, now: LocalDateTime, cx: Float, cy: Float, scale: Float) {
+    val angle = hourAngle(now, settings.outerRing24Hours)
     val dist = cx - 25f * scale
     drawCircle(
         color = Color.White,
@@ -149,13 +149,14 @@ private fun DrawScope.drawDummyEventArcs(settings: WatchFaceSettings, cx: Float,
     val arcThickness = settings.calendarEventThickness * scale
     val levelSpacing = arcThickness + WatchFaceSettings.EVENT_RING_GAP * scale
     val baseOffset = arcThickness / 2f + WatchFaceSettings.EVENT_RING_GAP / 2f * scale
+    val ringHours = if (settings.outerRing24Hours) 24f else 12f
 
     for ((index, event) in events.withIndex()) {
         val radius = cx - baseOffset - index * levelSpacing
 
         // Angles from 3 o'clock reference (for drawArc)
-        val startDeg = event.startHour / 12f * 360f - 90f
-        val endDeg = event.endHour / 12f * 360f - 90f
+        val startDeg = event.startHour / ringHours * 360f - 90f
+        val endDeg = event.endHour / ringHours * 360f - 90f
 
         drawArc(
             color = event.color,
@@ -176,7 +177,7 @@ private fun DrawScope.drawAnalogHands(
     cy: Float,
     scale: Float
 ) {
-    val hrAngle = hourAngle(now, settings.use24hourHands)
+    val hrAngle = hourAngle(now, settings.outerRing24Hours)
     val minAngle = now.minute / 30.0 * Math.PI
     val secAngle = now.second / 30.0 * Math.PI
 

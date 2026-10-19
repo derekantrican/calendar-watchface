@@ -3,11 +3,10 @@ package com.derekantrican.calendarwatchface.shared
 data class WatchFaceSettings(
     val analogClock: Boolean = false,
     val militaryTime: Boolean = true,
-    val use24hourHands: Boolean = false,
+    val outerRing24Hours: Boolean = false, // false = 12h ring showing only the current AM/PM half
     val hourLeadingZero: Boolean = true,
     val drawColonBetweenHourAndMinute: Boolean = false,
     val showTickMarksOnAmbient: Boolean = false,
-    val use24hourTickMarks: Boolean = false,
     val showNowIndicatorOnTickmarks: Boolean = true,
     val showDateOnFace: Boolean = true,
     val dateFormat: String = "EEE  dd",

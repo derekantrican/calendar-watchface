@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.cos
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sin
 
 class CalendarWatchFaceRenderer(
@@ -127,7 +128,7 @@ class CalendarWatchFaceRenderer(
 
         // Draw calendar event arcs
         if (settings.showCalendarEvents && (settings.showCalendarEventsInAmbient || !isAmbient)) {
-            drawEventArcs(canvas, centerX, centerY, isAmbient)
+            drawEventArcs(canvas, centerX, centerY, zonedDateTime, isAmbient)
         }
 
         // Draw clock
@@ -156,7 +157,8 @@ class CalendarWatchFaceRenderer(
         val numberOfTicks = 24
 
         for (i in 0 until numberOfTicks) {
-            val innerRadius = if (i % 2 == 0 || settings.use24hourTickMarks) {
+            // 24h ring: every tick is an hour. 12h ring: odd ticks are half-hours (shorter).
+            val innerRadius = if (i % 2 == 0 || settings.outerRing24Hours) {
                 centerX - 15f
             } else {
                 centerX - 10f
@@ -182,7 +184,7 @@ class CalendarWatchFaceRenderer(
         centerY: Float,
         zonedDateTime: ZonedDateTime
     ) {
-        val angle = getHourHandAngle(zonedDateTime, fromTop = true)
+        val angle = getHourHandAngle(zonedDateTime, use24hours = settings.outerRing24Hours)
         val dist = centerX - 25f
         val indicatorPaint = Paint().apply { color = Color.WHITE }
         canvas.drawCircle(
@@ -197,9 +199,25 @@ class CalendarWatchFaceRenderer(
         canvas: Canvas,
         centerX: Float,
         centerY: Float,
+        zonedDateTime: ZonedDateTime,
         isAmbient: Boolean
     ) {
-        if (events.isEmpty()) return
+        // The ring covers the whole day (24h) or only the current AM/PM half (12h)
+        val startOfDay = zonedDateTime.toLocalDate().atStartOfDay(zonedDateTime.zone)
+        val (windowStart, windowEnd) = when {
+            settings.outerRing24Hours -> startOfDay to startOfDay.plusDays(1)
+            zonedDateTime.hour < 12 -> startOfDay to startOfDay.plusHours(12)
+            else -> startOfDay.plusHours(12) to startOfDay.plusDays(1)
+        }.let { (start, end) -> start.toInstant().toEpochMilli() to end.toInstant().toEpochMilli() }
+        val windowLength = (windowEnd - windowStart).toFloat()
+
+        // Clip events to the window so ones spanning noon/midnight show only the visible part
+        val visibleEvents = events.mapNotNull { event ->
+            val start = max(event.startTimeMillis, windowStart)
+            val end = min(event.endTimeMillis, windowEnd)
+            if (start < end) event.copy(startTimeMillis = start, endTimeMillis = end) else null
+        }
+        if (visibleEvents.isEmpty()) return
 
         val arcThickness = settings.calendarEventThickness.toFloat()
         val levelSpacing = arcThickness + WatchFaceSettings.EVENT_RING_GAP
@@ -207,14 +225,11 @@ class CalendarWatchFaceRenderer(
         val maxRings = 4
 
         // Assign ring levels based on overlap detection
-        val ringAssignments = assignRingLevels(events, maxRings)
+        val ringAssignments = assignRingLevels(visibleEvents, maxRings)
 
         for ((event, ring) in ringAssignments) {
             val level = baseOffset + ring * levelSpacing
             val radius = centerX - level
-
-            val startAngle = getTimeAngle(event.startTimeMillis, fromTop = false)
-            val endAngle = getTimeAngle(event.endTimeMillis, fromTop = false)
 
             val color = if (settings.calendarEventColorWhiteInAmbient && isAmbient) {
                 Color.WHITE
@@ -229,9 +244,9 @@ class CalendarWatchFaceRenderer(
                 style = Paint.Style.STROKE
             }
 
-            val startDeg = Math.toDegrees(startAngle.toDouble()).toFloat()
-            val endDeg = Math.toDegrees(endAngle.toDouble()).toFloat()
-            val sweepDeg = endDeg - startDeg
+            // drawArc measures from 3 o'clock; subtract 90 to start from 12 o'clock
+            val startDeg = (event.startTimeMillis - windowStart) / windowLength * 360f - 90f
+            val sweepDeg = (event.endTimeMillis - event.startTimeMillis) / windowLength * 360f
 
             val oval = RectF(
                 centerX - radius, centerY - radius,
@@ -281,7 +296,7 @@ class CalendarWatchFaceRenderer(
             // Date above center for analog mode (placeholder for future)
         }
 
-        val hrAngle = getHourHandAngle(zonedDateTime, fromTop = true, use24hours = settings.use24hourHands)
+        val hrAngle = getHourHandAngle(zonedDateTime, use24hours = settings.outerRing24Hours)
         val minAngle = getMinuteHandAngle(zonedDateTime)
 
         val hrLength = centerX - 80f
@@ -420,14 +435,12 @@ class CalendarWatchFaceRenderer(
     // Angle from 12 o'clock, clockwise, in radians
     private fun getHourHandAngle(
         time: ZonedDateTime,
-        fromTop: Boolean = true,
         use24hours: Boolean = false
     ): Float {
         val hour = time.hour.toFloat()
         val minute = time.minute.toFloat()
         val divisor = if (use24hours) 12f else 6f
-        val angle = ((hour + minute / 60f) / divisor) * Math.PI.toFloat()
-        return if (fromTop) angle else angle - (Math.PI / 2f).toFloat()
+        return ((hour + minute / 60f) / divisor) * Math.PI.toFloat()
     }
 
     private fun getMinuteHandAngle(time: ZonedDateTime): Float {
@@ -436,13 +449,6 @@ class CalendarWatchFaceRenderer(
 
     private fun getSecondHandAngle(time: ZonedDateTime): Float {
         return time.second / 30f * Math.PI.toFloat()
-    }
-
-    // Get angle for a time in millis (for event arcs)
-    private fun getTimeAngle(timeMillis: Long, fromTop: Boolean): Float {
-        val instant = java.time.Instant.ofEpochMilli(timeMillis)
-        val zdt = instant.atZone(java.time.ZoneId.systemDefault())
-        return getHourHandAngle(zdt, fromTop = fromTop)
     }
 
     private fun createTestEvents(): List<CalendarEvent> {

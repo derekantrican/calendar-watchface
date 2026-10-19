@@ -31,11 +31,10 @@ class SettingsListenerService : WearableListenerService() {
                     applicationContext.settingsDataStore.edit { prefs ->
                         prefs[booleanPreferencesKey("analog_clock")] = dataMap.getBoolean("analogClock", false)
                         prefs[booleanPreferencesKey("military_time")] = dataMap.getBoolean("militaryTime", true)
-                        prefs[booleanPreferencesKey("use_24hour_hands")] = dataMap.getBoolean("use24hourHands", false)
+                        prefs[booleanPreferencesKey("outer_ring_24_hours")] = dataMap.getBoolean("outerRing24Hours", false)
                         prefs[booleanPreferencesKey("hour_leading_zero")] = dataMap.getBoolean("hourLeadingZero", true)
                         prefs[booleanPreferencesKey("draw_colon")] = dataMap.getBoolean("drawColon", false)
                         prefs[booleanPreferencesKey("tick_marks_ambient")] = dataMap.getBoolean("tickMarksAmbient", false)
-                        prefs[booleanPreferencesKey("use_24hour_ticks")] = dataMap.getBoolean("use24hourTicks", false)
                         prefs[booleanPreferencesKey("now_indicator")] = dataMap.getBoolean("nowIndicator", true)
                         prefs[booleanPreferencesKey("show_date")] = dataMap.getBoolean("showDate", true)
                         prefs[stringPreferencesKey("date_format")] = dataMap.getString("dateFormat", "EEE  dd")!!

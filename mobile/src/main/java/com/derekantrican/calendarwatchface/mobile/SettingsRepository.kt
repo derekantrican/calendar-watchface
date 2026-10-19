@@ -26,11 +26,10 @@ class SettingsRepository(private val context: Context) {
         return WatchFaceSettings(
             analogClock = prefs[Keys.ANALOG_CLOCK] ?: defaults.analogClock,
             militaryTime = prefs[Keys.MILITARY_TIME] ?: defaults.militaryTime,
-            use24hourHands = prefs[Keys.USE_24HOUR_HANDS] ?: defaults.use24hourHands,
+            outerRing24Hours = prefs[Keys.OUTER_RING_24_HOURS] ?: defaults.outerRing24Hours,
             hourLeadingZero = prefs[Keys.HOUR_LEADING_ZERO] ?: defaults.hourLeadingZero,
             drawColonBetweenHourAndMinute = prefs[Keys.DRAW_COLON] ?: defaults.drawColonBetweenHourAndMinute,
             showTickMarksOnAmbient = prefs[Keys.TICK_MARKS_AMBIENT] ?: defaults.showTickMarksOnAmbient,
-            use24hourTickMarks = prefs[Keys.USE_24HOUR_TICKS] ?: defaults.use24hourTickMarks,
             showNowIndicatorOnTickmarks = prefs[Keys.NOW_INDICATOR] ?: defaults.showNowIndicatorOnTickmarks,
             showDateOnFace = prefs[Keys.SHOW_DATE] ?: defaults.showDateOnFace,
             dateFormat = prefs[Keys.DATE_FORMAT] ?: defaults.dateFormat,
@@ -52,11 +51,10 @@ class SettingsRepository(private val context: Context) {
         context.settingsDataStore.edit { prefs ->
             prefs[Keys.ANALOG_CLOCK] = settings.analogClock
             prefs[Keys.MILITARY_TIME] = settings.militaryTime
-            prefs[Keys.USE_24HOUR_HANDS] = settings.use24hourHands
+            prefs[Keys.OUTER_RING_24_HOURS] = settings.outerRing24Hours
             prefs[Keys.HOUR_LEADING_ZERO] = settings.hourLeadingZero
             prefs[Keys.DRAW_COLON] = settings.drawColonBetweenHourAndMinute
             prefs[Keys.TICK_MARKS_AMBIENT] = settings.showTickMarksOnAmbient
-            prefs[Keys.USE_24HOUR_TICKS] = settings.use24hourTickMarks
             prefs[Keys.NOW_INDICATOR] = settings.showNowIndicatorOnTickmarks
             prefs[Keys.SHOW_DATE] = settings.showDateOnFace
             prefs[Keys.DATE_FORMAT] = settings.dateFormat
@@ -74,11 +72,10 @@ class SettingsRepository(private val context: Context) {
             val putDataReq = PutDataMapRequest.create(Constants.SETTINGS_PATH).apply {
                 dataMap.putBoolean("analogClock", settings.analogClock)
                 dataMap.putBoolean("militaryTime", settings.militaryTime)
-                dataMap.putBoolean("use24hourHands", settings.use24hourHands)
+                dataMap.putBoolean("outerRing24Hours", settings.outerRing24Hours)
                 dataMap.putBoolean("hourLeadingZero", settings.hourLeadingZero)
                 dataMap.putBoolean("drawColon", settings.drawColonBetweenHourAndMinute)
                 dataMap.putBoolean("tickMarksAmbient", settings.showTickMarksOnAmbient)
-                dataMap.putBoolean("use24hourTicks", settings.use24hourTickMarks)
                 dataMap.putBoolean("nowIndicator", settings.showNowIndicatorOnTickmarks)
                 dataMap.putBoolean("showDate", settings.showDateOnFace)
                 dataMap.putString("dateFormat", settings.dateFormat)
@@ -101,11 +98,10 @@ class SettingsRepository(private val context: Context) {
     private object Keys {
         val ANALOG_CLOCK = booleanPreferencesKey("analog_clock")
         val MILITARY_TIME = booleanPreferencesKey("military_time")
-        val USE_24HOUR_HANDS = booleanPreferencesKey("use_24hour_hands")
+        val OUTER_RING_24_HOURS = booleanPreferencesKey("outer_ring_24_hours")
         val HOUR_LEADING_ZERO = booleanPreferencesKey("hour_leading_zero")
         val DRAW_COLON = booleanPreferencesKey("draw_colon")
         val TICK_MARKS_AMBIENT = booleanPreferencesKey("tick_marks_ambient")
-        val USE_24HOUR_TICKS = booleanPreferencesKey("use_24hour_ticks")
         val NOW_INDICATOR = booleanPreferencesKey("now_indicator")
         val SHOW_DATE = booleanPreferencesKey("show_date")
         val DATE_FORMAT = stringPreferencesKey("date_format")
